@@ -4,7 +4,7 @@ const supertest = require('supertest')
 const tape = require('tape')
 
 const {pgp} = require('db')
-const request = supertest(require('app').callback())
+const request = supertest(require('server').callback())
 
 const cache = new Map()
 
