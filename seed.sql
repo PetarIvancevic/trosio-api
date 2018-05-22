@@ -1,25 +1,25 @@
 INSERT INTO
   "user" (id, name, email)
-  VALUES (1, 'first user', 'first@test.test');
+  VALUES ('jopibu12rj2', 'first user', 'first@test.test');
 INSERT INTO
   "user" (id, name, email)
-  VALUES (2, 'second user', 'second@test.test');
+  VALUES ('ajhsiogaioagbio', 'second user', 'second@test.test');
 INSERT INTO
   "user" (id, name, email)
-  VALUES (3, 'third user', 'third@test.test');
+  VALUES ('AaiofoiOIB12', 'third user', 'third@test.test');
 
 INSERT INTO
-  wallet (currency, amount, user_id)
-  VALUES (10, 1000, 1);
+  wallet (id, currency, paycheck_day, amount, user_id)
+  VALUES (1, 10, 2, 1000, 'jopibu12rj2');
 INSERT INTO
-  wallet (currency, amount, user_id)
-  VALUES (20, 11000, 2);
+  wallet (id, currency, paycheck_day, amount, user_id)
+  VALUES (2, 20, 22, 11000, 'ajhsiogaioagbio');
 INSERT INTO
-  wallet (currency, amount, user_id)
-  VALUES (30, 1050, 3);
+  wallet (id ,currency, paycheck_day, amount, user_id)
+  VALUES (3, 30, 15, 1050, 'AaiofoiOIB12');
 INSERT INTO
-  wallet (currency, amount, user_id)
-  VALUES (20, 1200, 1);
+  wallet (id ,currency, paycheck_day, amount, user_id)
+  VALUES (4, 20, 11, 1200, 'jopibu12rj2');
 
 INSERT INTO
   expense (category, amount, date, place, wallet_id)
