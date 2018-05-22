@@ -17,4 +17,9 @@ module.exports = {
       not_found: 1100,
     },
   },
+  currency: {
+    euro: 10,
+    kuna: 20,
+    dollar: 30,
+  },
 }

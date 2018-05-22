@@ -20,7 +20,7 @@ router.get('/user/:id', validate('param', {
 router.post('/user', validate('body', {
   email: joi.string().email().required(),
   id: joi.string().required(),
-  name: joi.string().min(4).max(200).required(),
+  name: joi.string().trim().min(4).max(200).required(),
 }), async function (ctx) {
   await userRepo.create(ctx.v.body)
   ctx.state.r = await userRepo.getById(ctx.v.body.id)
@@ -30,7 +30,7 @@ router.put('/user/:id', validate('param', {
   id: joi.string().required(),
 }), validate('body', {
   email: joi.string().email().required(),
-  name: joi.string().min(4).max(200).required(),
+  name: joi.string().trim().min(4).max(200).required(),
 }), async function (ctx) {
   ctx.state.r = await userRepo.updateById(ctx.v.param.id, ctx.v.body)
 })

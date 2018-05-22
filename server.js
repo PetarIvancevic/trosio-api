@@ -10,6 +10,7 @@ app.use(require('koa-bodyparser')())
 app.use(require('middleware/error'))
 
 app.use(mount('/', require('route/user').routes()))
+app.use(mount('/', require('route/wallet').routes()))
 
 app.use(async function (ctx, next) {
   ctx.throw(404)

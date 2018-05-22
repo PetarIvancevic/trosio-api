@@ -3,7 +3,7 @@ const _ = require('lodash')
 const assert = require('assert')
 const pgp = require('pg-promise')
 
-const {errors} = require('const.js')
+const konst = require('const.js')
 
 class GenericError extends NestedError {
   constructor (ec, cause, status) {
@@ -19,7 +19,7 @@ class HttpError extends GenericError {}
 class ValidationError extends GenericError {}
 
 function code (ec) {
-  const code = _.get(errors, ec)
+  const code = _.get(konst.errors, ec)
   assert(code, 'invalid error const specified')
   return code
 }

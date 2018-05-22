@@ -7,6 +7,7 @@ const {pgp} = require('db')
 const request = supertest(require('server').callback())
 
 const cache = new Map()
+const store = new Map()
 
 tape.onFinish(async function () {
   await pgp.end()
@@ -28,7 +29,7 @@ function test () {
 function testOnly () {
   const cb = _.last(arguments)
   tape.only(..._.initial(arguments), async function (t) {
-    await cb(t)
+    await cb(t, store)
     t.end()
   })
 }
@@ -36,7 +37,7 @@ function testOnly () {
 function api () {
   const cb = _.last(arguments)
   tape(..._.initial(arguments), async function (t) {
-    await cb(t, request)
+    await cb(t, request, store)
     t.end()
   })
 }
@@ -44,7 +45,7 @@ function api () {
 function apiOnly () {
   const cb = _.last(arguments)
   tape.only(..._.initial(arguments), async function (t) {
-    await cb(t, request)
+    await cb(t, request, store)
     t.end()
   })
 }
