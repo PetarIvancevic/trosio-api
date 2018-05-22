@@ -5,7 +5,8 @@ CREATE TABLE "user" (
   id INTEGER NOT NULL,
   name VARCHAR(254) NOT NULL,
   email VARCHAR(254) NOT NULL,
-  CONSTRAINT user_pk PRIMARY KEY (id)
+  CONSTRAINT user_pk PRIMARY KEY (id),
+  CONSTRAINT email_unique UNIQUE (email)
 );
 
 CREATE TABLE wallet (
