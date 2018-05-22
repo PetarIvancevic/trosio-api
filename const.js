@@ -12,5 +12,9 @@ module.exports = {
       write: 800,
       delete: 900,
     },
+    user: {
+      duplicate: 1000,
+      not_found: 1100,
+    },
   },
 }
