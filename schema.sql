@@ -2,20 +2,22 @@ DROP SCHEMA IF EXISTS public CASCADE;
 CREATE SCHEMA public;
 
 CREATE TABLE "user" (
-  id INTEGER NOT NULL,
+  id VARCHAR(254) NOT NULL,
   name VARCHAR(254) NOT NULL,
   email VARCHAR(254) NOT NULL,
-  CONSTRAINT user_pk PRIMARY KEY (id)
+  CONSTRAINT user_pk PRIMARY KEY (id),
+  CONSTRAINT email_unique UNIQUE (email)
 );
 
 CREATE TABLE wallet (
   id SERIAL,
   currency SMALLINT NOT NULL,
-  paycheck_date TIMESTAMPTZ NOT NULL DEFAULT now(),
+  paycheck_day SMALLINT NOT NULL,
   amount INTEGER NOT NULL DEFAULT 0,
-  user_id INTEGER NOT NULL,
+  user_id VARCHAR(254) NOT NULL,
   CONSTRAINT wallet_pk PRIMARY KEY (id),
-  CONSTRAINT user_fk FOREIGN KEY (user_id) REFERENCES "user" (id)
+  CONSTRAINT user_fk FOREIGN KEY (user_id) REFERENCES "user" (id),
+  CONSTRAINT paycheck_day_chk CHECK (paycheck_day BETWEEN 1 AND 30)
 );
 
 CREATE TABLE expense (
