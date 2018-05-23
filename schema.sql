@@ -16,7 +16,7 @@ CREATE TABLE wallet (
   amount INTEGER NOT NULL DEFAULT 0,
   user_id VARCHAR(254) NOT NULL,
   CONSTRAINT wallet_pk PRIMARY KEY (id),
-  CONSTRAINT wallet_user_fk FOREIGN KEY (user_id) REFERENCES "user" (id),
+  CONSTRAINT wallet_user_fk FOREIGN KEY (user_id) REFERENCES "user" (id) ON DELETE CASCADE,
   CONSTRAINT paycheck_day_chk CHECK (paycheck_day BETWEEN 1 AND 30)
 );
 
@@ -28,5 +28,5 @@ CREATE TABLE expense (
   place VARCHAR(60) NOT NULL,
   wallet_id INTEGER NOT NULL,
   CONSTRAINT expense_pk PRIMARY KEY (id),
-  CONSTRAINT expense_wallet_fk FOREIGN KEY (wallet_id) REFERENCES wallet (id)
+  CONSTRAINT expense_wallet_fk FOREIGN KEY (wallet_id) REFERENCES wallet (id) ON DELETE CASCADE
 );
