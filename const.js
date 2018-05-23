@@ -1,5 +1,5 @@
 module.exports = {
-  errors: {
+  error: {
     http: {
       bad_request: 400,
       unauthorized: 401,
@@ -16,10 +16,21 @@ module.exports = {
       duplicate: 1000,
       not_found: 1100,
     },
+    wallet: {
+      not_found: 2000,
+    },
+    expense: {
+      not_found: 3000,
+    },
   },
   currency: {
     euro: 10,
     kuna: 20,
     dollar: 30,
+  },
+  category: {
+    dummyCategory1: 10,
+    dummyCategory2: 20,
+    dummyCategory3: 30,
   },
 }

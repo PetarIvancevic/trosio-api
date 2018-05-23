@@ -32,7 +32,8 @@ router.put('/user/:id', validate('param', {
   email: joi.string().email().required(),
   name: joi.string().trim().min(4).max(200).required(),
 }), async function (ctx) {
-  ctx.state.r = await userRepo.updateById(ctx.v.param.id, ctx.v.body)
+  await userRepo.updateById(ctx.v.param.id, ctx.v.body)
+  ctx.state.r = await userRepo.getById(ctx.v.param.id)
 })
 
 router.delete('/user/:id', validate('param', {

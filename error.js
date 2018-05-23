@@ -19,7 +19,7 @@ class HttpError extends GenericError {}
 class ValidationError extends GenericError {}
 
 function code (ec) {
-  const code = _.get(konst.errors, ec)
+  const code = _.get(konst.error, ec)
   assert(code, 'invalid error const specified')
   return code
 }

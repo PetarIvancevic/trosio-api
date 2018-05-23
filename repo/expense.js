@@ -4,26 +4,27 @@ const {mapper} = require('repo/base')
 
 const map = mapper({
   amount: 'amount',
-  currency: 'currency',
+  category: 'category',
+  date: 'date',
   id: 'id',
-  paycheckDay: 'paycheck_day',
-  userId: 'user_id',
+  place: 'place',
+  walletId: 'wallet_id',
 })
 
 async function create (data) {
   return db.one(`
     INSERT INTO
-      wallet (amount, currency, paycheck_day, user_id)
-      VALUES ($[amount], $[currency], $[paycheckDay], $[userId])
+      expense (amount, category, date, place, wallet_id)
+      VALUES ($[amount], $[category], $[date], $[place], $[walletId])
     RETURNING id
   `, data)
-  .catch({constraint: 'wallet_user_fk'}, error('user.not_found'))
+  .catch({constraint: 'expense_wallet_fk'}, error('wallet.not_found'))
   .catch(error.db('db.write'))
 }
 
 async function get () {
   return db.any(`
-    SELECT * FROM wallet
+    SELECT * FROM expense
   `)
   .map(map)
   .catch(error.db('db.read'))
@@ -32,44 +33,45 @@ async function get () {
 async function getById (id) {
   return db.one(`
     SELECT *
-    FROM wallet
+    FROM expense
     WHERE id = $[id]
   `, {id})
   .then(map)
-  .catch(error.QueryResultError, error('wallet.not_found'))
+  .catch(error.QueryResultError, error('expense.not_found'))
   .catch(error.db('db.read'))
 }
 
-async function getByUserId (userId) {
+async function getByWalletId (walletId) {
   return db.any(`
     SELECT *
-    FROM wallet
-    WHERE user_id = $[userId]
-  `, {userId})
+    FROM expense
+    WHERE wallet_id = $[walletId]
+  `, {walletId})
   .map(map)
-  .catch(error.QueryResultError, error('wallet.not_found'))
+  .catch(error.QueryResultError, error('expense.not_found'))
   .catch(error.db('db.read'))
 }
 
 async function removeById (id) {
   return db.one(`
-    DELETE FROM wallet WHERE id = $[id]
+    DELETE FROM expense WHERE id = $[id]
     RETURNING id
   `, {id})
-  .catch(error.QueryResultError, error('wallet.not_found'))
+  .catch(error.QueryResultError, error('expense.not_found'))
   .catch(error.db('db.delete'))
 }
 
 async function updateById (id, data) {
   return db.one(`
-    UPDATE wallet
+    UPDATE expense
     SET amount = $[amount],
-      currency = $[currency],
-      paycheck_day = $[paycheckDay]
+      category = $[category],
+      date = $[date],
+      place = $[place]
     WHERE id = $[id]
     RETURNING id
   `, {id, ...data})
-  .catch(error.QueryResultError, error('wallet.not_found'))
+  .catch(error.QueryResultError, error('expense.not_found'))
   .catch(error.db('db.write'))
 }
 
@@ -77,7 +79,7 @@ module.exports = {
   create,
   get,
   getById,
-  getByUserId,
+  getByWalletId,
   removeById,
   updateById,
 }
