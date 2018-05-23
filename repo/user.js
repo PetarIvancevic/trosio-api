@@ -41,8 +41,8 @@ async function removeById (id) {
 async function updateById (id, data) {
   return db.one(`
     UPDATE "user"
-    SET name=$[name],
-      email=$[email]
+    SET name = $[name],
+      email = $[email]
     WHERE id = $[id]
     RETURNING id
   `, {id, ...data})
