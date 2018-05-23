@@ -9,17 +9,17 @@ INSERT INTO
   VALUES ('AaiofoiOIB12', 'third user', 'third@test.test');
 
 INSERT INTO
-  wallet (id, currency, paycheck_day, amount, user_id)
-  VALUES (1, 10, 2, 1000, 'jopibu12rj2');
+  wallet (amount, currency, paycheck_day, user_id)
+  VALUES (1000, 10, 2, 'jopibu12rj2');
 INSERT INTO
-  wallet (id, currency, paycheck_day, amount, user_id)
-  VALUES (2, 20, 22, 11000, 'ajhsiogaioagbio');
+  wallet (amount, currency, paycheck_day, user_id)
+  VALUES (11000, 20, 22, 'ajhsiogaioagbio');
 INSERT INTO
-  wallet (id ,currency, paycheck_day, amount, user_id)
-  VALUES (3, 30, 15, 1050, 'AaiofoiOIB12');
+  wallet (amount, currency, paycheck_day, user_id)
+  VALUES (1050, 30, 15, 'AaiofoiOIB12');
 INSERT INTO
-  wallet (id ,currency, paycheck_day, amount, user_id)
-  VALUES (4, 20, 11, 1200, 'jopibu12rj2');
+  wallet (amount, currency, paycheck_day, user_id)
+  VALUES (1200, 20, 11, 'jopibu12rj2');
 
 INSERT INTO
   expense (category, amount, date, place, wallet_id)

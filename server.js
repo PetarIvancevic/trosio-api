@@ -9,6 +9,7 @@ app.use(require('kcors')())
 app.use(require('koa-bodyparser')())
 app.use(require('middleware/error'))
 
+app.use(mount('/', require('route/expense').routes()))
 app.use(mount('/', require('route/user').routes()))
 app.use(mount('/', require('route/wallet').routes()))
 

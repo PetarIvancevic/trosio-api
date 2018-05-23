@@ -25,12 +25,6 @@ router.get('/wallet/user/:userId', validate('param', {
   ctx.state.r = await walletRepo.getByUserId(ctx.v.param.userId)
 })
 
-router.get('/wallet/user/:userId', validate('param', {
-  userId: joi.string().required(),
-}), async function (ctx) {
-  ctx.state.r = await walletRepo.getByUserId(ctx.v.param.userId)
-})
-
 router.post('/wallet', validate('body', {
   amount: joi.number().integer().positive().required(),
   currency: joi.any().valid(_.values(konst.currency)).required(),
