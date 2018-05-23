@@ -16,6 +16,5 @@ View the database with
 ```
 docker run -p 8081:8081 --link tsn-pg:db -e "DATABASE_URL=postgres://tsn:tsn@db:5432/tsn?sslmode=disable" --rm sosedoff/pgweb
 ```
-Once you've entered that command, go to `http://0.0.0.0:8081/` and enter `db` as host, `trosio` for everything else and disable ssl.
 
 To create the database run `npm run db:recreate`.
