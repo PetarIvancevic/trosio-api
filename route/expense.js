@@ -44,7 +44,8 @@ router.put('/expense/:id', validate('param', {
   date: joi.date().required(),
   place: joi.string().trim().max(60).required(),
 }), async function (ctx) {
-  ctx.state.r = await expenseRepo.updateById(ctx.v.param.id, ctx.v.body)
+  await expenseRepo.updateById(ctx.v.param.id, ctx.v.body)
+  ctx.state.r = await expenseRepo.getById(ctx.v.param.id)
 })
 
 router.delete('/expense/:id', validate('param', {
