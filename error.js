@@ -3,7 +3,7 @@ const _ = require('lodash')
 const assert = require('assert')
 const pgp = require('pg-promise')
 
-const konst = require('const.js')
+const errors = require('const').error
 
 class GenericError extends NestedError {
   constructor (ec, cause, status) {
@@ -19,34 +19,37 @@ class HttpError extends GenericError {}
 class ValidationError extends GenericError {}
 
 function code (ec) {
-  const code = _.get(konst.error, ec)
+  const code = _.get(errors, ec)
   assert(code, 'invalid error const specified')
   return code
 }
 
-function wrapper (ErrorClass, defaultStatus = 500, nothrow = false) {
-  return function (ec, status = defaultStatus, defaultCause = null) {
-    if (defaultCause) {
-      const err = new ErrorClass(ec, defaultCause, status)
+function wrapper (ErrorClass, defaultStatus = 500) {
+  return function (ec, status = defaultStatus) {
+    return function handler (cause, nothrow = false) {
+      if (cause instanceof GenericError && !nothrow) {
+        throw cause
+      }
+      const err = new ErrorClass(ec, cause, status)
       if (nothrow) return err
       throw err
-    }
-    return function handler (cause) {
-      throw new ErrorClass(ec, cause, status)
     }
   }
 }
 
 const error = wrapper(GenericError, 400)
-
 error.db = wrapper(DatabaseError, 500)
-error.http = wrapper(HttpError, 500, true)
+error.http = wrapper(HttpError, 500)
 error.validation = wrapper(ValidationError, 400)
+
+error.errors = errors
 
 error.AssertionError = assert.AssertionError
 error.DatabaseError = DatabaseError
 error.GenericError = GenericError
-error.ValidationError = ValidationError
+error.HttpError = HttpError
+error.QueryFileError = pgp.errors.QueryFileError
 error.QueryResultError = pgp.errors.QueryResultError
+error.ValidationError = ValidationError
 
 module.exports = error
