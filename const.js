@@ -17,10 +17,14 @@ module.exports = {
       not_found: 1100,
     },
     wallet: {
-      not_found: 2000,
+      not_found: 2100,
     },
     expense: {
-      not_found: 3000,
+      not_found: 3100,
+    },
+    category: {
+      duplicate: 4000,
+      not_found: 4100,
     },
   },
   currency: {
