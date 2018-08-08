@@ -14,16 +14,21 @@ module.exports = {
     },
     user: {
       duplicate: 1000,
+      does_not_exist: 1001,
       not_found: 1100,
     },
     wallet: {
+      duplicate: 1000,
+      does_not_exist: 1001,
       not_found: 2100,
     },
-    expense: {
+    transaction: {
+      does_not_exist: 3001,
       not_found: 3100,
     },
     category: {
       duplicate: 4000,
+      does_not_exist: 4001,
       not_found: 4100,
     },
   },
@@ -31,10 +36,5 @@ module.exports = {
     euro: 10,
     kuna: 20,
     dollar: 30,
-  },
-  category: {
-    dummyCategory1: 10,
-    dummyCategory2: 20,
-    dummyCategory3: 30,
   },
 }

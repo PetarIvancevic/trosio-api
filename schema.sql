@@ -19,13 +19,15 @@ CREATE TABLE category (
 
 CREATE TABLE wallet (
   id SERIAL,
-  amount INTEGER NOT NULL DEFAULT 0,
+  balance INTEGER DEFAULT 0,
+  paycheck_amount INTEGER NOT NULL DEFAULT 0,
   currency SMALLINT NOT NULL,
   name TEXT NOT NULL,
-  paycheck_day SMALLINT NOT NULL,
+  paycheck_day SMALLINT,
   user_id VARCHAR(255) NOT NULL REFERENCES "user" (id) ON DELETE CASCADE,
   PRIMARY KEY (id),
-  CONSTRAINT paycheck_day_check CHECK (paycheck_day BETWEEN 1 AND 31)
+  CONSTRAINT paycheck_day_check CHECK (paycheck_day BETWEEN 1 AND 31),
+  UNIQUE (user_id, name)
 );
 
 CREATE TABLE "transaction" (
@@ -34,7 +36,7 @@ CREATE TABLE "transaction" (
   category_id INTEGER NOT NULL REFERENCES category (id) ON DELETE RESTRICT,
   comment TEXT,
   "date" DATE NOT NULL,
-  place TEXT NOT NULL,
+  place TEXT,
   wallet_id INTEGER NOT NULL REFERENCES wallet (id) ON DELETE CASCADE,
   PRIMARY KEY (id)
 );
