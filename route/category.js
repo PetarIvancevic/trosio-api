@@ -1,7 +1,6 @@
 const _ = require('lodash')
 const joi = require('joi')
 const router = new (require('koa-router'))()
-const jwt = require('jsonwebtoken')
 
 const auth = require('middleware/auth')
 const responder = require('middleware/responder')
@@ -18,9 +17,10 @@ router.get('/category', auth.jwt, async function (ctx) {
 router.post('/category', auth.jwt, validate('body', {
   name: joi.string().trim().min(2).required(),
 }), async function (ctx) {
+  console.log('???????')
   const userId = _.get(ctx, 'state.user.id')
   const categoryId = _.get(await categoryRepo.create(ctx.v.body.name, userId), 'id')
-  ctx.state.r = await categoryRepo.getById(categoryId)
+  ctx.state.r = await categoryRepo.getById(categoryId) || []
 })
 
 router.get('/category/:id', auth.jwt, validate('param', {
