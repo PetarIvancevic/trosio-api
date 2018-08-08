@@ -1,5 +1,4 @@
 const _ = require('lodash')
-const assert = require('assert')
 const jwt = require('jsonwebtoken')
 const supertest = require('supertest')
 const tape = require('tape')
@@ -78,18 +77,18 @@ const testUser = {
   name: 'test user',
 }
 
-async function createUser (email = testUser.email) {
+async function createUser (testData = {}) {
   return db.one(`
     INSERT INTO "user" (id, email, name)
     VALUES ($[id], $[email], $[name])
     RETURNING id
-  `, {...testUser, email})
+  `, _.defaults(testData, testUser))
 }
 
 function auth (id) {
   const token = jwt.sign({id}, process.env.JWT_SECRET)
   return {
-    'Authorization': `Bearer ${token}`
+    'Authorization': `Bearer ${token}`,
   }
 }
 
