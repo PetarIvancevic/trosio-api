@@ -27,7 +27,7 @@ function validate (target, schema, options = {}) {
     const {error: err, value: data} = schemaCompiled.validate(input, opts)
     if (err) {
       err.target = target
-      throw error.validation('http.bad_request', 400, err)
+      throw error.validation('http.bad_request', 400)(err)
     }
 
     _.set(ctx, `v.${target}`, _.assign({}, _.get(ctx, `v.${target}`), data))

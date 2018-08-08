@@ -6,9 +6,7 @@ module.exports = {
   "rules": {
     "comma-dangle": ["error", "always-multiline"],
     "indent": ["error", 2, {
-      "CallExpression": {"arguments": 0},
-      "MemberExpression": 0,
-      "SwitchCase": 1
+      "MemberExpression": 0
     }],
     "no-else-return": "error",
     "promise/valid-params": "off"
