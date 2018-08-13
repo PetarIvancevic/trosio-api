@@ -1,63 +1,76 @@
 const _ = require('lodash')
+const sinon = require('sinon')
 
-const test = require('test')
+const error = require('error')
+const googleService = require('services/google')
+const konst = require('const')
+const testHelper = require('test')
 
-test.api('user post 1', async function (t, request, store) {
-  const user = {
-    id: 'fakeid123456',
-    email: 'new@mail.com',
-    name: 'user user',
+async function createPrerequisites (request) {
+  const categoryData = {name: 'test category'}
+  const walletData = {
+    balance: 1000,
+    currency: konst.currency.kuna,
+    name: 'test wallet',
+    paycheckAmount: 3000,
+    paycheckDay: 3,
   }
-  const r = await request.post('/user').send(user)
-  t.is(r.status, 200, 'success')
-  t.notok(r.body.error, 'no error')
-  t.ok(r.body.data, 'user posted')
-  store.set('user', user)
-})
 
-test.api('user post 2', async function (t, request, store) {
-  const user = {
-    id: 'usertodelete',
-    email: 'delete@user.com',
-    name: 'i0ahsdbh -238h mgh1g19h 1g9tm84thm1t',
+  const user = await testHelper.createUser()
+  const {body: {data: category}} = await request.post('/category')
+  .set(testHelper.auth(user.id))
+  .send(categoryData)
+
+  const {body: {data: wallet}} = await request.post('/wallet')
+  .set(testHelper.auth(user.id))
+  .send(walletData)
+
+  const transactionData = {
+    amount: 2000,
+    categoryId: category.id,
+    comment: 'some comment',
+    date: '2017-12-12T22:00:00.000Z',
+    place: 'Kaufland',
   }
-  const r = await request.post('/user').send(user)
-  t.is(r.status, 200, 'success')
-  t.notok(r.body.error, 'no error')
-  t.ok(r.body.data, 'user posted')
+  await request.post(`/wallet/${wallet.id}/transaction`)
+  .set(testHelper.auth(user.id))
+  .send(transactionData)
+
+  return user
+}
+
+testHelper.api('should create a new user', async function (test, request) {
+  const userData = {
+    email: 'test@mail.com',
+    sub: 'testuserid',
+    name: 'test test',
+  }
+  const stub = sinon.stub(googleService, 'verify').returns(userData)
+  const {body} = await request.post('/user').send({idToken: 'thisistheidtoken'})
+
+  test.same({
+    ...body.data,
+    token: !!body.data.token,
+  }, {
+    email: userData.email,
+    id: userData.sub,
+    name: userData.name,
+    token: true,
+  }, 'a new user should be created')
+  stub.restore()
 })
 
-test.api('user put by id', async function (t, request, store) {
-  const id = store.get('user').id
-  const r = await request.put(`/user/${id}`).send({
-    email: 'newer@mail.com',
-    name: 'edited user',
-  })
-  t.is(r.status, 200, 'success')
-  t.notok(r.body.error, 'no error')
-  t.ok(_.get(r.body.data, 'id'), 'user edited by id')
+testHelper.api('should throw and error when creating a new user', async function (test, request) {
+  const stub = sinon.stub(googleService, 'verify').throws(error('google.invalid_token'))
+  const {body} = await request.post('/user').send({idToken: 'thisistheidtoken'})
+
+  test.ok(body.error === 'google.invalid_token', 'invalid token error has been thrown')
+  stub.restore()
 })
 
-test.api('get user list', async function (t, request, store) {
-  const r = await request.get('/user')
-  t.is(r.status, 200, 'success')
-  t.notok(r.body.error, 'no error')
-  t.ok(_.find(r.body.data, {id: store.get('user').id}), 'user')
-})
+testHelper.api('should delete the user', async function (test, request) {
+  const user = await createPrerequisites(request)
+  const {body} = await request.delete(`/user/${user.id}`).set(testHelper.auth(user.id))
 
-test.api('get user by id', async function (t, request, store) {
-  const id = store.get('user').id
-  const r = await request.get(`/user/${id}`)
-  t.is(r.status, 200, 'success')
-  t.notok(r.body.error, 'no error')
-  t.ok(_.get(r.body.data, 'email') === 'newer@mail.com', 'user')
-  store.set('user', r.body.data)
-})
-
-test.api('delete user by id', async function (t, request, store) {
-  const id = 'usertodelete'
-  const r = await request.delete(`/user/${id}`)
-  t.is(r.status, 200, 'success')
-  t.notok(r.body.error, 'no error')
-  t.ok(_.get(r.body.data, 'id') === id, 'user deleted')
+  test.ok(_.isEmpty(body.data), 'user deleted')
 })
