@@ -48,15 +48,17 @@
     "npm": "5"
   },
   "scripts": {
-    "lint:check": "eslint .",
-    "lint:fix": "eslint --fix .",
-    "migrate": "node -r babel-register -r ./env migrate.js",
+    "ci": "run-s -s lint:check db:recreate db:seed test",
+    "db:recreate": "npm run migrate recreate",
+    "db:seed": "npm run migrate seed",
     "dev": "run-p -s dev:server",
     "dev:expose": "node bin/ngrok.js",
     "dev:server": "nodemon -q -I -e js,json -i package.json -- -r babel-register server.js",
-    "test": "tape -r babel-register -r ./env **/*.test.js | tap-spec",
-    "db:recreate": "npm run migrate recreate",
-    "db:seed": "npm run migrate seed",
-    "ci": "run-s -s lint:check db:recreate db:seed test"
+    "heroku:postbuild": "./heroku.sh",
+    "lint:check": "eslint .",
+    "lint:fix": "eslint --fix .",
+    "migrate": "node -r babel-register -r ./env migrate.js",
+    "start": "node -r babel-register -r ./env server.js",
+    "test": "tape -r babel-register -r ./env **/*.test.js | tap-spec"
   }
 }
