@@ -17,7 +17,6 @@ router.get('/category', auth.jwt, async function (ctx) {
 router.post('/category', auth.jwt, validate('body', {
   name: joi.string().trim().min(2).required(),
 }), async function (ctx) {
-  console.log('???????')
   const userId = _.get(ctx, 'state.user.id')
   const categoryId = _.get(await categoryRepo.create(ctx.v.body.name, userId), 'id')
   ctx.state.r = await categoryRepo.getById(categoryId) || []

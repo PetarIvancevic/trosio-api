@@ -1,45 +1,35 @@
 const joi = require('joi')
 const router = new (require('koa-router'))()
+const jwt = require('jsonwebtoken')
 
+const auth = require('middleware/auth')
+const googleService = require('services/google')
 const responder = require('middleware/responder')
 const userRepo = require('repo/user')
 const validate = require('middleware/validate')
 
 router.use(responder)
 
-router.get('/user', async function (ctx) {
-  ctx.state.r = await userRepo.get()
-})
-
-router.get('/user/:id', validate('param', {
-  id: joi.string().required(),
-}), async function (ctx) {
-  ctx.state.r = await userRepo.getById(ctx.v.param.id)
-})
-
 router.post('/user', validate('body', {
-  email: joi.string().email().required(),
-  id: joi.string().required(),
-  name: joi.string().trim().min(4).max(200).required(),
+  idToken: joi.string().trim().required(),
 }), async function (ctx) {
-  await userRepo.create(ctx.v.body)
-  ctx.state.r = await userRepo.getById(ctx.v.body.id)
+  const userGoogleData = await googleService.verify(ctx.v.body.idToken)
+  await userRepo.create({
+    email: userGoogleData.email,
+    id: userGoogleData.sub,
+    name: userGoogleData.name,
+  })
+  ctx.state.r = {
+    token: jwt.sign({id: userGoogleData.sub}, process.env.JWT_SECRET),
+    ...(await userRepo.getById(userGoogleData.sub)),
+  }
 })
 
-router.put('/user/:id', validate('param', {
-  id: joi.string().required(),
-}), validate('body', {
-  email: joi.string().email().required(),
-  name: joi.string().trim().min(4).max(200).required(),
-}), async function (ctx) {
-  await userRepo.updateById(ctx.v.param.id, ctx.v.body)
-  ctx.state.r = await userRepo.getById(ctx.v.param.id)
-})
-
-router.delete('/user/:id', validate('param', {
+router.delete('/user/:id', auth.jwt, validate('param', {
   id: joi.string().required(),
 }), async function (ctx) {
-  ctx.state.r = await userRepo.removeById(ctx.v.param.id)
+  await userRepo.removeById(ctx.v.param.id)
+  ctx.state.r = {}
 })
 
 module.exports = router

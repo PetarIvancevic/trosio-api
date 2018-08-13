@@ -22,6 +22,9 @@ module.exports = {
       does_not_exist: 1001,
       not_found: 2100,
     },
+    google: {
+      invalid_token: 5500,
+    },
     transaction: {
       does_not_exist: 3001,
       not_found: 3100,

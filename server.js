@@ -3,6 +3,8 @@ require('env')
 const app = new (require('koa'))()
 const mount = require('koa-mount')
 
+app.silent = process.env.LOG_LEVEL < 3
+
 app.use(require('koa-response-time')())
 app.use(require('koa-helmet')())
 app.use(require('kcors')())
