@@ -18,7 +18,7 @@ router.post('/wallet/:walletId/transaction', auth.jwt, validate('param', {
   walletId: joi.number().integer().positive().required(),
 }), validate('body', {
   amount: joi.number().integer().positive().required(),
-  categoryId: joi.number().integer().positive().required(),
+  categoryId: joi.number().integer().positive().optional(),
   comment: joi.string().trim().optional(),
   date: joi.string().trim().isoDate().required(),
   place: joi.string().trim().optional(),
@@ -42,7 +42,7 @@ router.put('/wallet/:walletId/transaction/:transactionId', auth.jwt, validate('p
   walletId: joi.number().integer().positive().required(),
 }), validate('body', {
   amount: joi.number().integer().positive().required(),
-  categoryId: joi.number().integer().positive().required(),
+  categoryId: joi.number().integer().positive().allow(null).required(),
   comment: joi.string().trim().allow(null).required(),
   date: joi.string().trim().isoDate().required(),
   place: joi.string().trim().required(),

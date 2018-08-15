@@ -33,7 +33,7 @@ CREATE TABLE wallet (
 CREATE TABLE "transaction" (
   id SERIAL,
   amount INTEGER NOT NULL,
-  category_id INTEGER NOT NULL REFERENCES category (id) ON DELETE RESTRICT,
+  category_id INTEGER REFERENCES category (id) ON DELETE RESTRICT,
   comment TEXT,
   "date" DATE NOT NULL,
   place TEXT,
