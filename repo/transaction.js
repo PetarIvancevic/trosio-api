@@ -28,6 +28,14 @@ async function create (data) {
   .catch(error.db('db.write'))
 }
 
+async function getByCategoryId (categoryId) {
+  return db.any(`
+    SELECT *
+    FROM transaction
+    WHERE category_id = $[categoryId]
+  `, {categoryId})
+}
+
 async function getByWalletId (walletId) {
   return db.any(`
     SELECT * FROM "transaction"
@@ -71,6 +79,7 @@ async function updateById (id, data) {
 
 module.exports = {
   create,
+  getByCategoryId,
   getById,
   getByWalletId,
   removeById,

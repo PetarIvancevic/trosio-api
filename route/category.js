@@ -5,6 +5,7 @@ const router = new (require('koa-router'))()
 const auth = require('middleware/auth')
 const responder = require('middleware/responder')
 const categoryRepo = require('repo/category')
+const transactionRepo = require('repo/transaction')
 const validate = require('middleware/validate')
 
 router.use(responder)
@@ -27,6 +28,13 @@ router.get('/category/:id', auth.jwt, validate('param', {
 }), async function (ctx) {
   const categoryId = _.get(ctx, 'v.param.id')
   ctx.state.r = await categoryRepo.getById(categoryId)
+})
+
+router.get('/category/:id/transactions', auth.jwt, validate('param', {
+  id: joi.number().positive().required(),
+}), async function (ctx) {
+  const categoryId = _.get(ctx, 'v.param.id')
+  ctx.state.r = await transactionRepo.getByCategoryId(categoryId)
 })
 
 router.put('/category/:id', auth.jwt, validate('param', {
