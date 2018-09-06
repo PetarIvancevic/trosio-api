@@ -1,9 +1,11 @@
 DROP SCHEMA IF EXISTS public CASCADE;
 CREATE SCHEMA public;
 
+CREATE TYPE transaction_type AS ENUM ('deposit', 'withdrawal');
+
 CREATE TABLE "user" (
   id VARCHAR(255) NOT NULL,
-  email TEXT NOT NULL,
+  email VARCHAR(254) NOT NULL,
   name TEXT NOT NULL,
   PRIMARY KEY (id),
   UNIQUE (email)
@@ -32,11 +34,18 @@ CREATE TABLE wallet (
 
 CREATE TABLE "transaction" (
   id SERIAL,
+  "date" TIMESTAMP WITH TIME ZONE NOT NULL,
   amount INTEGER NOT NULL,
   category_id INTEGER REFERENCES category (id) ON DELETE RESTRICT,
   comment TEXT,
-  "date" DATE NOT NULL,
   place TEXT,
+  type transaction_type,
   wallet_id INTEGER NOT NULL REFERENCES wallet (id) ON DELETE CASCADE,
+  PRIMARY KEY (id)
+);
+
+CREATE TABLE cron_log (
+  id SERIAL,
+  "date" TIMESTAMP WITH TIME ZONE NOT NULL,
   PRIMARY KEY (id)
 );

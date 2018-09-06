@@ -1,7 +1,9 @@
 const _ = require('lodash')
 
-const {db, helper: dbHelper} = require('db')
 const error = require('error')
+const genericServices = require('services/generic')
+const walletRepo = require('repo/wallet')
+const {db, helper: dbHelper} = require('db')
 const {mapper} = require('repo/base')
 
 const map = mapper({
@@ -11,18 +13,26 @@ const map = mapper({
   date: 'date',
   id: 'id',
   place: 'place',
+  type: 'type',
   walletId: 'wallet_id',
 })
 
 async function create (data) {
-  return db.one(dbHelper.insert({
-    amount: data.amount,
-    category_id: data.categoryId,
-    comment: data.comment,
-    date: data.date,
-    place: data.place,
-    wallet_id: data.walletId,
-  }, null, 'transaction') + ' RETURNING id')
+  return db.tx(async function (transaction) {
+    const createdTransaction = await transaction.one(dbHelper.insert({
+      amount: data.amount,
+      category_id: data.categoryId,
+      comment: data.comment,
+      date: data.date,
+      place: data.place,
+      type: data.type,
+      wallet_id: data.walletId,
+    }, null, 'transaction') + ' RETURNING id')
+
+    await walletRepo.updateWalletBalanceWithTransaction(transaction, _.pick(data, ['amount', 'type', 'walletId']))
+
+    return createdTransaction
+  })
   .catch({constraint: 'transaction_category_id_fkey'}, error('category.does_not_exist'))
   .catch({constraint: 'transaction_wallet_id_fkey'}, error('wallet.does_not_exist'))
   .catch(error.db('db.write'))
@@ -56,23 +66,53 @@ async function getById (id) {
   .then(map)
 }
 
-async function removeById (id) {
-  return db.none(`
-    DELETE FROM "transaction"
-    WHERE id = $[id]
-  `, {id})
+async function removeById (transactionId) {
+  return db.tx(async function (transaction) {
+    const transactionData = await getById(transactionId)
+
+    await transaction.none(`
+      DELETE FROM "transaction"
+      WHERE id = $[transactionId]
+    `, {transactionId})
+
+    await walletRepo.updateWalletBalanceWithTransaction(transaction, {
+      ..._.pick(transactionData, ['amount', 'walletId']),
+      type: genericServices.getOpositeTransactionType(transactionData.type),
+    })
+  })
+  .catch(error.QueryResultError, error('transaction.not_found'))
   .catch(error.db('db.delete'))
 }
 
-async function updateById (id, data) {
-  return db.none(dbHelper.update(_.omitBy({
-    amount: data.amount,
-    category_id: data.categoryId,
-    comment: data.comment,
-    date: data.date,
-    place: data.place,
-  }, _.overSome([_.isUndefined, _.isNaN])
-  ), null, 'transaction') + ' WHERE id = $[id]', {id})
+async function updateById (transactionId, walletId, data) {
+  return db.tx(async function (transaction) {
+    const previousTransactionData = await transaction.one(`
+      SELECT amount, type
+      FROM transaction
+      WHERE id = $[transactionId]
+    `, {transactionId})
+
+    await walletRepo.updateWalletBalanceWithTransaction(transaction, {
+      amount: previousTransactionData.amount,
+      type: genericServices.getOpositeTransactionType(previousTransactionData.type),
+      walletId,
+    })
+
+    await transaction.none(dbHelper.update(_.omitBy({
+      amount: data.amount,
+      category_id: data.categoryId,
+      comment: data.comment,
+      date: data.date,
+      place: data.place,
+      type: data.type,
+    }, _.overSome([_.isUndefined, _.isNaN])
+    ), null, 'transaction') + ' WHERE id = $[transactionId]', {transactionId})
+
+    await walletRepo.updateWalletBalanceWithTransaction(transaction, {
+      ..._.pick(data, ['amount', 'type']),
+      walletId,
+    })
+  })
   .catch({constraint: 'transaction_category_id_fkey'}, error('category.does_not_exist'))
   .catch(error.db('db.write'))
 }

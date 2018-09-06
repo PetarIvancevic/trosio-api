@@ -12,6 +12,7 @@ app.use(require('koa-bodyparser')())
 app.use(require('middleware/error'))
 
 app.use(mount('/', require('route/category').routes()))
+app.use(mount('/', require('route/cron').routes()))
 app.use(mount('/', require('route/transaction').routes()))
 app.use(mount('/', require('route/user').routes()))
 app.use(mount('/', require('route/wallet').routes()))

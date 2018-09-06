@@ -1,5 +1,6 @@
 const _ = require('lodash')
 
+const consts = require('const')
 const error = require('error')
 const {db, helper: dbHelper} = require('db')
 const {mapper} = require('repo/base')
@@ -68,10 +69,33 @@ async function updateById (id, data) {
   .catch(error.db('db.write'))
 }
 
+async function updateWalletBalanceWithTransaction (transaction, {amount, type, walletId}) {
+  const operator = type === consts.transactionTypes.withdrawal ? '-' : '+'
+  return transaction.one(`
+    UPDATE wallet
+    SET balance = balance ${operator} $[amount]
+    WHERE id = $[walletId]
+    RETURNING id
+  `, {amount, walletId})
+  .catch(error.QueryResultError, error('wallet.not_found'))
+  .catch(error.db('db.write'))
+}
+
+async function updateWalletsForPaydayWithTransaction (transaction, dayOfMonth) {
+  return transaction.none(`
+    UPDATE wallet
+    SET balance = balance + paycheck_amount
+    WHERE paycheck_day = $[dayOfMonth]
+  `, {dayOfMonth})
+  .catch(error.db('db.write'))
+}
+
 module.exports = {
   create,
   getById,
   getByUserId,
   removeById,
   updateById,
+  updateWalletBalanceWithTransaction,
+  updateWalletsForPaydayWithTransaction,
 }

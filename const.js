@@ -1,4 +1,9 @@
 module.exports = {
+  currency: {
+    euro: 10,
+    kuna: 20,
+    dollar: 30,
+  },
   error: {
     http: {
       bad_request: 400,
@@ -35,9 +40,8 @@ module.exports = {
       not_found: 4100,
     },
   },
-  currency: {
-    euro: 10,
-    kuna: 20,
-    dollar: 30,
+  transactionTypes: {
+    deposit: 'deposit',
+    withdrawal: 'withdrawal',
   },
 }

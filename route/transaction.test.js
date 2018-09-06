@@ -1,13 +1,13 @@
 const _ = require('lodash')
 
-const konst = require('const')
+const consts = require('const')
 const testHelper = require('test')
 
 async function createPrerequisites (request) {
   const categoryData = {name: 'test category'}
   const walletData = {
     balance: 1000,
-    currency: konst.currency.kuna,
+    currency: consts.currency.kuna,
     name: 'test wallet',
     paycheckAmount: 3000,
     paycheckDay: 3,
@@ -29,7 +29,7 @@ async function createPrerequisites (request) {
   }
 }
 
-testHelper.api('should create a transaction', async function (test, request) {
+testHelper.api('should create a deposit transaction', async function (test, request) {
   const {user, category, wallet} = await createPrerequisites(request)
 
   const transactionData = {
@@ -38,11 +38,42 @@ testHelper.api('should create a transaction', async function (test, request) {
     comment: 'some comment',
     date: '2017-12-12T22:00:00.000Z',
     place: 'Kaufland',
+    type: consts.transactionTypes.deposit,
   }
   const {body} = await request.post(`/wallet/${wallet.id}/transaction`)
   .set(testHelper.auth(user.id))
   .send(transactionData)
 
+  const walletData = await request.get(`/wallet/${wallet.id}`)
+  .set(testHelper.auth(user.id))
+
+  test.ok(walletData.body.data.balance === 3000, 'wallet balance should be 3000')
+  test.same(_.omit(body.data, 'date'), {
+    ..._.omit(transactionData, 'date'),
+    id: 1,
+    walletId: wallet.id,
+  })
+})
+
+testHelper.api('should create a withdrawal transaction', async function (test, request) {
+  const {user, category, wallet} = await createPrerequisites(request)
+
+  const transactionData = {
+    amount: 2000,
+    categoryId: category.id,
+    comment: 'some comment',
+    date: '2017-12-12T22:00:00.000Z',
+    place: 'Kaufland',
+    type: consts.transactionTypes.withdrawal,
+  }
+  const {body} = await request.post(`/wallet/${wallet.id}/transaction`)
+  .set(testHelper.auth(user.id))
+  .send(transactionData)
+
+  const walletData = await request.get(`/wallet/${wallet.id}`)
+  .set(testHelper.auth(user.id))
+
+  test.ok(walletData.body.data.balance === -1000, 'wallet balance should be -1000')
   test.same(_.omit(body.data, 'date'), {
     ..._.omit(transactionData, 'date'),
     id: 1,
@@ -59,6 +90,7 @@ testHelper.api('should throw an error for transaction creation, because category
     comment: 'some comment',
     date: '2017-12-12T22:00:00.000Z',
     place: 'Kaufland',
+    type: consts.transactionTypes.withdrawal,
   }
   const {body} = await request.post(`/wallet/${wallet.id}/transaction`)
   .set(testHelper.auth(user.id))
@@ -76,6 +108,7 @@ testHelper.api('should throw an error for transaction creation, because category
     comment: 'some comment',
     date: '2017-12-12T22:00:00.000Z',
     place: 'Kaufland',
+    type: consts.transactionTypes.withdrawal,
   }
   const {body} = await request.post('/wallet/9999/transaction')
   .set(testHelper.auth(user.id))
@@ -93,6 +126,7 @@ testHelper.api('should get wallet transactions', async function (test, request) 
     comment: 'some comment',
     date: '2017-12-12T22:00:00.000Z',
     place: 'Kaufland',
+    type: consts.transactionTypes.withdrawal,
   }
   const transaction02Data = {
     amount: 13,
@@ -100,6 +134,7 @@ testHelper.api('should get wallet transactions', async function (test, request) 
     comment: 'some comment',
     date: '2017-12-13T22:00:00.000Z',
     place: 'Kaufland',
+    type: consts.transactionTypes.deposit,
   }
 
   await request.post(`/wallet/${wallet.id}/transaction`)
@@ -113,6 +148,10 @@ testHelper.api('should get wallet transactions', async function (test, request) 
   const {body} = await request.get(`/wallet/${wallet.id}/transaction`)
   .set(testHelper.auth(user.id))
 
+  const {body: {data: walletData}} = await request.get(`/wallet/${wallet.id}`)
+  .set(testHelper.auth(user.id))
+
+  test.ok(walletData.balance === 1003, 'the balance should be correct')
   test.ok(_.size(body.data) === 2, 'there should be two transactions')
   test.ok(_(body.data).filter(function (transaction) {
     return transaction.walletId === wallet.id
@@ -127,6 +166,7 @@ testHelper.api('should get the transaction', async function (test, request) {
     comment: 'some comment',
     date: '2017-12-12T22:00:00.000Z',
     place: 'Kaufland',
+    type: consts.transactionTypes.withdrawal,
   }
   const {body: {data: transaction}} = await request.post(`/wallet/${wallet.id}/transaction`)
   .set(testHelper.auth(user.id))
@@ -160,6 +200,7 @@ testHelper.api('should update the transaction', async function (test, request) {
     comment: 'some comment',
     date: '2017-12-12T22:00:00.000Z',
     place: 'Kaufland',
+    type: consts.transactionTypes.withdrawal,
   }
   const {body: {data: transaction}} = await request.post(`/wallet/${wallet.id}/transaction`)
   .set(testHelper.auth(user.id))
@@ -171,16 +212,21 @@ testHelper.api('should update the transaction', async function (test, request) {
     comment: 'some comment 123',
     date: '2017-12-10T22:00:00.000Z',
     place: 'koko',
+    type: consts.transactionTypes.withdrawal,
   }
   const {body} = await request.put(`/wallet/${wallet.id}/transaction/${transaction.id}`)
   .set(testHelper.auth(user.id))
   .send(updateTransactionData)
+
+  const {body: {data: walletData}} = await request.get(`/wallet/${wallet.id}`)
+  .set(testHelper.auth(user.id))
 
   test.same(_.omit(body.data, 'date'), {
     ..._.omit(updateTransactionData, 'date'),
     id: transaction.id,
     walletId: wallet.id,
   })
+  test.ok(walletData.balance === 988, 'amount should be correct')
 })
 
 testHelper.api('should update the transaction comment to null', async function (test, request) {
@@ -191,6 +237,7 @@ testHelper.api('should update the transaction comment to null', async function (
     comment: 'some comment',
     date: '2017-12-12T22:00:00.000Z',
     place: 'Kaufland',
+    type: consts.transactionTypes.withdrawal,
   }
   const {body: {data: transaction}} = await request.post(`/wallet/${wallet.id}/transaction`)
   .set(testHelper.auth(user.id))
@@ -202,6 +249,7 @@ testHelper.api('should update the transaction comment to null', async function (
     comment: null,
     date: '2017-12-10T22:00:00.000Z',
     place: 'koko',
+    type: consts.transactionTypes.withdrawal,
   }
   const {body} = await request.put(`/wallet/${wallet.id}/transaction/${transaction.id}`)
   .set(testHelper.auth(user.id))
@@ -222,6 +270,7 @@ testHelper.api('should delete the transaction', async function (test, request) {
     comment: 'some comment',
     date: '2017-12-12T22:00:00.000Z',
     place: 'Kaufland',
+    type: consts.transactionTypes.withdrawal,
   }
   const {body: {data: transaction}} = await request.post(`/wallet/${wallet.id}/transaction`)
   .set(testHelper.auth(user.id))
@@ -230,5 +279,9 @@ testHelper.api('should delete the transaction', async function (test, request) {
   const {body} = await request.delete(`/wallet/${wallet.id}/transaction/${transaction.id}`)
   .set(testHelper.auth(user.id))
 
+  const {body: {data: walletData}} = await request.get(`/wallet/${wallet.id}`)
+  .set(testHelper.auth(user.id))
+
   test.notOk(body.error, 'there should be no errors')
+  test.ok(walletData.balance === 1000, 'balance should be ok')
 })

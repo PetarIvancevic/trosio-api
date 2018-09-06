@@ -2,11 +2,17 @@ const joi = require('joi')
 const router = new (require('koa-router'))()
 
 const auth = require('middleware/auth')
+const consts = require('const')
 const responder = require('middleware/responder')
 const transactionRepo = require('repo/transaction')
 const validate = require('middleware/validate')
 
 router.use(responder)
+
+const validTransactionTypesArray = [
+  consts.transactionTypes.deposit,
+  consts.transactionTypes.withdrawal,
+]
 
 router.get('/wallet/:walletId/transaction', auth.jwt, validate('param', {
   walletId: joi.number().integer().positive().required(),
@@ -17,16 +23,17 @@ router.get('/wallet/:walletId/transaction', auth.jwt, validate('param', {
 router.post('/wallet/:walletId/transaction', auth.jwt, validate('param', {
   walletId: joi.number().integer().positive().required(),
 }), validate('body', {
-  amount: joi.number().integer().required(),
+  amount: joi.number().integer().positive().required(),
   categoryId: joi.number().integer().positive().optional(),
   comment: joi.string().trim().optional(),
   date: joi.string().trim().isoDate().required(),
   place: joi.string().trim().optional(),
+  type: joi.string().trim().valid(validTransactionTypesArray).required(),
 }), async function (ctx) {
-  const {id} = await transactionRepo.create({
+  const {id} = (await transactionRepo.create({
     ...ctx.v.body,
     walletId: ctx.v.param.walletId,
-  })
+  }))
   ctx.state.r = await transactionRepo.getById(id)
 })
 
@@ -41,13 +48,14 @@ router.put('/wallet/:walletId/transaction/:transactionId', auth.jwt, validate('p
   transactionId: joi.number().integer().positive().required(),
   walletId: joi.number().integer().positive().required(),
 }), validate('body', {
-  amount: joi.number().integer().required(),
+  amount: joi.number().integer().positive().required(),
   categoryId: joi.number().integer().positive().allow(null).required(),
   comment: joi.string().trim().allow(null).required(),
   date: joi.string().trim().isoDate().required(),
   place: joi.string().trim().required(),
+  type: joi.string().trim().valid(validTransactionTypesArray).required(),
 }), async function (ctx) {
-  await transactionRepo.updateById(ctx.v.param.transactionId, ctx.v.body)
+  await transactionRepo.updateById(ctx.v.param.transactionId, ctx.v.param.walletId, ctx.v.body)
   ctx.state.r = await transactionRepo.getById(ctx.v.param.transactionId)
 })
 
