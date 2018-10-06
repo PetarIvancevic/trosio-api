@@ -1,8 +1,19 @@
 const _ = require('lodash')
+const auth = require('basic-auth')
 const jwt = require('koa-jwt')
 
 const error = require('error')
 const {db} = require('db')
+
+function basic (ctx, next) {
+  const user = auth(ctx.req)
+
+  if (process.env.BASIC_AUTH_CREDS !== `${user.name}:${user.pass}`) {
+    throw error.auth('http.unauthorized')()
+  }
+
+  return next()
+}
 
 function checkIfBelongsToUser (tableName) {
   return function (ctx) {
@@ -21,6 +32,7 @@ function checkIfBelongsToUser (tableName) {
 }
 
 module.exports = {
+  basic,
   category: checkIfBelongsToUser('category'),
   jwt: jwt({secret: process.env.JWT_SECRET}),
   transaction: checkIfBelongsToUser('transaction'),

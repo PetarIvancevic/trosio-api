@@ -8,9 +8,7 @@ const validate = require('middleware/validate')
 
 router.use(responder)
 
-router.post('/cron/monthly-salary', validate('query', {
-  token: joi.string().trim().required(),
-}), async function (ctx) {
+router.post('/cron/monthly-salary', auth.basic, async function (ctx) {
   ctx.state.r = await cronRepo.payday()
 })
 

@@ -17,6 +17,7 @@ class GenericError extends NestedError {
 class DatabaseError extends GenericError {}
 class HttpError extends GenericError {}
 class ValidationError extends GenericError {}
+class AuthorizationError extends GenericError {}
 
 function code (ec) {
   const code = _.get(errors, ec)
@@ -41,6 +42,7 @@ const error = wrapper(GenericError, 400)
 error.db = wrapper(DatabaseError, 500)
 error.http = wrapper(HttpError, 500)
 error.validation = wrapper(ValidationError, 400)
+error.auth = wrapper(AuthorizationError, 401)
 
 error.errors = errors
 
