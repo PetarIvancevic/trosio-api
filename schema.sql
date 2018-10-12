@@ -7,6 +7,7 @@ CREATE TABLE "user" (
   id VARCHAR(255) NOT NULL,
   email VARCHAR(254) NOT NULL,
   name TEXT NOT NULL,
+  created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW(),
   PRIMARY KEY (id),
   UNIQUE (email)
 );
@@ -15,6 +16,7 @@ CREATE TABLE category (
   id SERIAL,
   name TEXT NOT NULL,
   user_id VARCHAR(255) NOT NULL REFERENCES "user" (id) ON DELETE CASCADE,
+  created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW(),
   PRIMARY KEY (id),
   UNIQUE (user_id, name)
 );
@@ -27,6 +29,7 @@ CREATE TABLE wallet (
   name TEXT NOT NULL,
   paycheck_day SMALLINT,
   user_id VARCHAR(255) NOT NULL REFERENCES "user" (id) ON DELETE CASCADE,
+  created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW(),
   PRIMARY KEY (id),
   CONSTRAINT paycheck_day_check CHECK (paycheck_day BETWEEN 1 AND 31),
   UNIQUE (user_id, name)
@@ -41,6 +44,7 @@ CREATE TABLE "transaction" (
   place TEXT,
   type transaction_type,
   wallet_id INTEGER NOT NULL REFERENCES wallet (id) ON DELETE CASCADE,
+  created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW(),
   PRIMARY KEY (id)
 );
 

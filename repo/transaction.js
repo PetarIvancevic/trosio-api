@@ -43,6 +43,7 @@ async function getByCategoryId (categoryId) {
     SELECT *
     FROM transaction
     WHERE category_id = $[categoryId]
+    ORDER BY created_at DESC
   `, {categoryId})
 }
 
@@ -50,7 +51,7 @@ async function getByWalletId (queryParams, walletId) {
   return db.any(`
     SELECT * FROM "transaction"
     WHERE wallet_id = $[walletId]
-    ORDER BY "date" $[order:raw]
+    ORDER BY "date" $[order:raw], created_at DESC
     ${queryParams.limit ? `LIMIT $[limit]` : ''}
   `, {
     limit: queryParams.limit,
