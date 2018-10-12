@@ -46,11 +46,18 @@ async function getByCategoryId (categoryId) {
   `, {categoryId})
 }
 
-async function getByWalletId (walletId) {
+async function getByWalletId (queryParams, walletId) {
   return db.any(`
     SELECT * FROM "transaction"
     WHERE wallet_id = $[walletId]
-  `, {walletId})
+    ORDER BY "date" $[order:raw]
+    ${queryParams.limit ? `LIMIT $[limit]` : ''}
+  `, {
+    limit: queryParams.limit,
+    order: _.toUpper(queryParams.order),
+    walletId,
+  })
+  .tapCatch(console.error)
   .catch(error.db('db.read'))
   .map(map)
 }

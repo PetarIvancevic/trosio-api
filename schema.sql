@@ -21,7 +21,7 @@ CREATE TABLE category (
 
 CREATE TABLE wallet (
   id SERIAL,
-  balance INTEGER DEFAULT 0,
+  balance DOUBLE PRECISION DEFAULT 0,
   paycheck_amount INTEGER NOT NULL DEFAULT 0,
   currency SMALLINT NOT NULL,
   name TEXT NOT NULL,

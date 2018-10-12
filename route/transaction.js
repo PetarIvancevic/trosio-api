@@ -14,10 +14,13 @@ const validTransactionTypesArray = [
   consts.transactionTypes.withdrawal,
 ]
 
-router.get('/wallet/:walletId/transaction', auth.jwt, validate('param', {
+router.get('/wallet/:walletId/transaction', auth.jwt, validate('query', {
+  limit: joi.number().integer().positive().optional(),
+  order: joi.string().trim().allow(['asc', 'desc']).optional().default('desc'),
+}), validate('param', {
   walletId: joi.number().integer().positive().required(),
 }), async function (ctx) {
-  ctx.state.r = await transactionRepo.getByWalletId(ctx.v.param.walletId) || []
+  ctx.state.r = await transactionRepo.getByWalletId(ctx.v.query, ctx.v.param.walletId) || []
 })
 
 router.post('/wallet/:walletId/transaction', auth.jwt, validate('param', {

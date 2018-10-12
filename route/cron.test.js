@@ -55,7 +55,7 @@ async function createPrerequisites (request) {
 testHelper.api('should run the cron task', async function (test, request) {
   const {user, wallets} = await createPrerequisites(request)
 
-  await request.post('/cron/monthly-salary').send({})
+  await request.post('/cron/monthly-salary').auth('croniMcCron', 'alfstonk4r70qu33j9').send({})
 
   const {body: {data: wallet01Data}} = await request.get(`/wallet/${wallets.wallet01.id}`)
   .set(testHelper.auth(user.id))
